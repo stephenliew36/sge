@@ -1,8 +1,8 @@
 import os
 import openai
 
-PLAN_MODEL = "gpt-4o"  # Plan with a more capable model
-REASON_MODEL = "gpt-3.5-turbo"  # Use a cheaper model for reasoning
+PLAN_MODEL = "gpt-4o"
+REASON_MODEL = "gpt-4.1"
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -18,7 +18,7 @@ def generate_plan(user_prompt: str) -> str:
 
 
 def apply_plan(plan: str, user_prompt: str) -> str:
-    """Use a cheaper model to reason using the plan from the larger model."""
+    """Use another model to reason using the provided plan."""
     system_prompt = (
         "Follow this reasoning plan to produce the best answer:\n" + plan
     )
@@ -33,7 +33,7 @@ def apply_plan(plan: str, user_prompt: str) -> str:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Plan with GPT-4o then reason with GPT-3.5-turbo")
+    parser = argparse.ArgumentParser(description="Plan with gpt-4o then reason with gpt-4.1")
     parser.add_argument("prompt", help="User prompt for the assistant")
     args = parser.parse_args()
 

@@ -22,4 +22,4 @@ python plan_reason.py "Explain the theory of relativity"
 ```
 
 The script first asks `gpt-4o` for a reasoning plan, then uses
-`gpt-3.5-turbo` to generate the answer following that plan.
+`gpt-4.1` to generate the answer following that plan.
