@@ -9,24 +9,23 @@ import json
 
 
 # local data conversion
+answers = []
 math500_local = open("test.jsonl", "r")
-
-next(math500_local)
-for i, line in enumerate(math500_local):
+count = 0
+for line in math500_local:
     data = json.loads(line)
-    third_key = list(data.keys())[2]
-    answer_500 = data[third_key]
-    if i >= 500:
-        break
-
+    answers.append(data["answer"])
+    count += 1
 math500_local.close()
 
 
-answer_relevancy_metric = AnswerRelevancyMetric(threshold=0.7)
-test_case = LLMTestCase(
-    input=f"{answer}",
-    actual_output=f"{answer_500}",
-    retrieval_context=[""]
-)
+# basic eval test-case
+for times in range(500):
+    answer_relevancy_metric = AnswerRelevancyMetric(threshold=0.7)
+    test_case = LLMTestCase(
+        input=f"{answer}",
+        actual_output=f"{answers[times]}",
+        retrieval_context=[""]
+    )
 
-evaluate([test_case], [answer_relevancy_metric])
+    evaluate([test_case], [answer_relevancy_metric])

@@ -1,5 +1,5 @@
 from openai import OpenAI
-from evaluation import math500problem
+from evaluation import * 
 
 client = OpenAI(api_key="sk-proj-Wxiayo3dxvvPv9_0HCu5B7IQbsEX7-Qzt3VWy9-"
     "s2HXUQEG4a8n4ajuI96zm46KG3vCfG3MmhuT3BlbkFJGP0u"
