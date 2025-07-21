@@ -1,20 +1,28 @@
-from datasets import load_dataset   
-ds = load_dataset("HuggingFaceH4/MATH-500", split="test")
+# eval
+from deepeval import evaluate
+from deepeval.metrics import AnswerRelevancyMetric
+from deepeval.test_case import LLMTestCase
+from main import *
+import numpy as np
+import json
 
 
-def math500problem():
-    problemcount = 0
-    questions = []
-    for question in ds:
-        if problemcount >= 1:
-            break
-        questions.append(question)
-        problemcount += 1
-    return questions
+
+# local data conversion
+answers = []
+math500_local = open("test.jsonl", "r")
+for line in math500_local:
+    data = json.loads(line)
+    answers.append(data["answer"])
+math500_local.close()
 
 
-for i, q in enumerate(math500problem()):
-    print(f"{i+1}. {q['problem']}")
-    print("—" * 40)
-
-
+# basic eval test-case
+for times in range(500):
+    answer_relevancy_metric = AnswerRelevancyMetric(threshold=0.7)
+    test_case = LLMTestCase(
+        input=f"{generated_answers[times]}",
+        actual_output=f"{answers[times]}",
+        retrieval_context=[""]
+    )
+    evaluate([test_case], [answer_relevancy_metric])
