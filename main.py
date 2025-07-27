@@ -1,23 +1,20 @@
 from openai import OpenAI
 import json
 
-client = OpenAI(api_key="sk-proj-Wxiayo3dxvvPv9_0HCu5B7IQbsEX7-Qzt3VWy9-"
-    "s2HXUQEG4a8n4ajuI96zm46KG3vCfG3MmhuT3BlbkFJGP0u"
-    "ZHGm9L2u9NN6S_nf7UTC7dEGNqjQ"
-    "r3pSbXyIbGokvYOGbVRPqFOQpQGRmG2VOdn-pVpHcA")
+client = OpenAI(api_key="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")
 
 generated_answers = []
 
-with open("test.jsonl", "r") as f:
+with open("math500-sector one/batch-ten.jsonl", "r") as f:
     for i, line in enumerate(f):
-        if i >= 500:
+        if i >= 25:
             break
         q = json.loads(line)
         question = q['problem']
         print(f"{i+1}. {question}")
 
         plan_resp = client.chat.completions.create(
-            model="gpt-4o-mini-2024-07-18",
+            model="gpt-4.1-nano-2025-04-14",
             messages=[
                 {"role": "system", "content": "You're a highly capable meta-reasoner. For the following question, plan your approach in at most two sentences."},
                 {"role": "user", "content": question}
