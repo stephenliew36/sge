@@ -5,9 +5,9 @@ client = OpenAI(api_key="sk-proj-lM9SFZ1ic-v--FwVImRQqKh9tnYhjrXENqdxnmQeMHiug2I
 
 generated_answers = []
 
-with open("math500-sector one/batch-ten.jsonl", "r") as f:
+with open("math500-sector two/batch-twenty.jsonl", "r") as f:
     for i, line in enumerate(f):
-        if i >= 25:
+        if i >= 15:
             break
         q = json.loads(line)
         question = q['problem']
