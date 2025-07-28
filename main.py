@@ -5,7 +5,7 @@ client = OpenAI(api_key="sk-proj-lM9SFZ1ic-v--FwVImRQqKh9tnYhjrXENqdxnmQeMHiug2I
 
 generated_answers = []
 
-with open("math500-sector two/batch-twenty.jsonl", "r") as f:
+with open("aime24-batch one/batch-one.jsonl", "r") as f:
     for i, line in enumerate(f):
         if i >= 15:
             break
