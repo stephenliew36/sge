@@ -1,13 +1,11 @@
 from openai import OpenAI
 import json
 
-client = OpenAI(api_key="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")
-
+client = OpenAI(api_key="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")
 generated_answers = []
-
-with open("aime24-batch one/batch-one.jsonl", "r") as f:
+with open("aime.jsonl", "r") as f:
     for i, line in enumerate(f):
-        if i >= 15:
+        if i >= 3:
             break
         q = json.loads(line)
         question = q['problem']
