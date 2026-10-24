@@ -1,31 +1,20 @@
-import os
 import asyncio
-import json
-from pipeline import BATCHES, LRM_SYSTEM, run_sge
+import sys
+from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-def make_client():
-    from openai import OpenAI
-    return OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENAI_API_KEY"),
-    )
+from sge_pipline.data import read_jsonl
+from sge_pipline.pipeline import BATCHES, LRM_SYSTEM, make_client, run_sge
 
-
-def read_jsonl(path, limit=None):
-    items = []
-    with open(path, "r") as f:
-        for line in f:
-            if not line.strip():
-                continue
-            items.append(json.loads(line))
-            if limit is not None and len(items) >= limit:
-                break
-    return items
+DEFAULT_DATA = Path(__file__).resolve().parent / "math500" / "math500-sector one" / "batch-one.jsonl"
 
 
 async def run_all(q_count, file_path=None, batch=1, client=None):
-    question_list = read_jsonl(file_path, limit=q_count)
+    path = Path(file_path) if file_path else DEFAULT_DATA
+    question_list = read_jsonl(path, limit=q_count)
     models = BATCHES[batch]
     if client is None:
         client = make_client()
@@ -35,10 +24,9 @@ async def run_all(q_count, file_path=None, batch=1, client=None):
 
     results = []
     for item in question_list:
-        prompt = item["problem"]
         out = await asyncio.to_thread(
             run_sge,
-            prompt,
+            item["problem"],
             models["llm"],
             models["lrm"],
             client,
@@ -49,6 +37,6 @@ async def run_all(q_count, file_path=None, batch=1, client=None):
 
 
 if __name__ == "__main__":
-    results = asyncio.run(run_all(25, "math500/math500-sector one/batch-one.jsonl"))
+    results = asyncio.run(run_all(25))
     for res in results:
         print(res["route"], res["answer"])

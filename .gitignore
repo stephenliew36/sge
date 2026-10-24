@@ -4,3 +4,5 @@ __pycache__/
 .deepeval/
 .ipynb_checkpoints/
 .env
+.vscode/
+generated_answers.json

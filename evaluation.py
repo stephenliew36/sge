@@ -1,27 +1,34 @@
-# # eval
-# from deepeval import evaluate
-# from deepeval.metrics import AnswerRelevancyMetric
-# from deepeval.test_case import LLMTestCase
-# from main import *
-# import numpy as np
-# import json
+import argparse
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from sge_pipline.data import read_problems
+from sge_pipline.evaluate import report
 
 
-# # local data conversion
-# answers = []
-# math500_local = open("test.jsonl", "r")
-# for line in math500_local:
-#     data = json.loads(line)
-#     answers.append(data["answer"])
-# math500_local.close()
+def _field(row, keys):
+    if isinstance(row, dict):
+        for key in keys:
+            if key in row:
+                return row[key]
+        return ""
+    return row
 
 
-# # basic eval test-case
-# for times in range(500):
-#     answer_relevancy_metric = AnswerRelevancyMetric(threshold=0.7)
-#     test_case = LLMTestCase(
-#         input=f"{generated_answers[times]}",
-#         actual_output=f"{answers[times]}",
-#         retrieval_context=[""]
-#     )
-#     evaluate([test_case], [answer_relevancy_metric])
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("predictions")
+    parser.add_argument("gold")
+    args = parser.parse_args()
+    preds = read_problems(args.predictions)
+    golds = read_problems(args.gold)
+    report(
+        [_field(row, ("prediction", "output", "answer")) for row in preds],
+        [_field(row, ("answer", "solution")) for row in golds],
+    )
+
+
+if __name__ == "__main__":
+    main()

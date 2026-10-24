@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sge"
+version = "1.0.0"
+description = "Sequential Guided Execution"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "spacy>=3.7",
+    "nltk>=3.8",
+    "textstat>=0.7",
+    "openai>=1.40",
+]
+
+[tool.setuptools.packages.find]
+include = ["sge_pipline*"]

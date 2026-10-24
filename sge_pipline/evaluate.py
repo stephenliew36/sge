@@ -62,3 +62,19 @@ def score_answer(pred, gold, question=None, client=None):
     if os.environ.get("SGE_JUDGE") == "1" and client is not None and question is not None:
         return judge_accuracy(client, question, pred, gold)
     return answers_match(pred, gold)
+
+
+def report(preds, golds):
+    n = min(len(preds), len(golds))
+    hits = 0
+    for i in range(n):
+        pred = "" if preds[i] is None else str(preds[i]).strip()
+        gold = "" if golds[i] is None else str(golds[i]).strip()
+        ok = answers_match(pred, gold)
+        hits += int(ok)
+        print(f"\nTest Case {i + 1}")
+        print("Model Output:", pred)
+        print("Expected Output:", gold)
+        print("Correct?", ok)
+    print(f"accuracy {hits}/{n}")
+    return hits, n

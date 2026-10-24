@@ -1,61 +1,49 @@
-from openai import OpenAI
-import json
-import os
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / "sge_pipline"))
-from sge import route_sge
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+from sge_pipline.data import read_problems
+from sge_pipline.pipeline import make_client, run_sge
 
 LLM = "gpt-4.1-nano-2025-04-14"
 LRM = "o4-mini"
 
 
 def generate_answers(path, max_q=5):
-    generated_answers = []
-    with open(path, "r") as f:
-        data = json.load(f)
-    for i, q in enumerate(data):
+    client = make_client(base_url=None)
+    data = read_problems(path)
+    generated = []
+    for i, row in enumerate(data):
         if i >= max_q:
             break
-        question = q['problem']
-        print(f"{i+1}. {question}")
-
-        if route_sge(question) == "LLM":
-            resp = client.chat.completions.create(
-                model=LLM,
-                messages=[
-                    {"role": "system", "content": "You are a math solver. Output ONLY the final answer."},
-                    {"role": "user", "content": question},
-                ],
-            )
-            generated_answers.append(resp.choices[0].message.content)
-            continue
-
-        plan_resp = client.chat.completions.create(
-            model=LLM,
-            messages=[
-                {"role": "system", "content": "You're a highly capable meta-reasoner. For the following question, plan your approach in at most two sentences."},
-                {"role": "user", "content": question}
-            ]
+        question = row["problem"]
+        print(f"{i + 1}. {question}")
+        out = run_sge(
+            question,
+            LLM,
+            LRM,
+            client,
+            plan_system=(
+                "You're a highly capable meta-reasoner. "
+                "For the following question, plan your approach in at most two sentences."
+            ),
+            direct_system="You are a math solver. Output ONLY the final answer.",
+            lrm_system=(
+                "You're a frontier reasoning model. Answer the following question, "
+                "if the plan does not seem correct please refine the plan"
+            ),
+            guided_user=lambda plan, query, n=i + 1: (
+                f"{plan}\n\nNow answer the question: {query}\n\n"
+                "Format your answer clearly for a text file (.txt). "
+                f"Label your answer as 'Answer {n}:' so it matches the question number."
+            ),
         )
-        plan = plan_resp.choices[0].message.content
-
-        exec_resp = client.chat.completions.create(
-            model=LRM,
-            messages=[
-                {"role": "system", "content": "You're a frontier reasoning model. Answer the following question, if the plan does not seem correct please refine the plan"},
-                {"role": "user", "content": f"{plan}\n\nNow answer the question: {question}\n\nFormat your answer clearly for a text file (.txt). Label your answer as 'Answer {i+1}:' so it matches the question number."}
-            ]
-        )
-
-        answer = exec_resp.choices[0].message.content
-        generated_answers.append(answer)
-    return generated_answers
+        generated.append(out["answer"])
+    return generated
 
 
 if __name__ == "__main__":
-    root = Path(__file__).resolve().parents[2]
-    print(generate_answers(root / "benchmarks" / "aime_2024.json"))
+    print(generate_answers(ROOT / "benchmarks" / "aime_2024.json"))
