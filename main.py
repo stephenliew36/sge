@@ -1,7 +1,13 @@
 from openai import OpenAI
+import os
 import json
+import sys
+from pathlib import Path
 
-client = OpenAI(api_key="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")
+sys.path.append(str(Path(__file__).resolve().parent / "sge_pipline"))
+from sge import route_sge
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 generated_answers = []
 with open("aime.jsonl", "r") as f:
     for i, line in enumerate(f):
@@ -10,6 +16,17 @@ with open("aime.jsonl", "r") as f:
         q = json.loads(line)
         question = q['problem']
         print(f"{i+1}. {question}")
+
+        if route_sge(question) == "LLM":
+            direct = client.chat.completions.create(
+                model="gpt-4.1-nano-2025-04-14",
+                messages=[
+                    {"role": "system", "content": "You are a math solver. Output ONLY the final answer."},
+                    {"role": "user", "content": question},
+                ],
+            )
+            generated_answers.append(direct.choices[0].message.content)
+            continue
 
         plan_resp = client.chat.completions.create(
             model="gpt-4.1-nano-2025-04-14",

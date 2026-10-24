@@ -1,0 +1,5 @@
+numpy
+spacy
+nltk
+textstat
+openai
